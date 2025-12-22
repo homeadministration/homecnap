@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ЦНАП Admin</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<style>
+:root {
+    --bg:#fdfdfd; --white:#fff; --accent:#0052cc; --text:#1a1a1a; --border:rgba(0,0,0,0.08); --radius:20px; --transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+body{font-family:'Inter',sans-serif;margin:0;display:flex;min-height:100vh;background:var(--bg);color:var(--text);}
+aside{width:280px;background:var(--white);border-right:1px solid var(--border);padding:40px 20px;position:fixed;height:100vh;box-sizing:border-box;z-index:100;}
+.nav-menu button{width:100%;padding:14px;margin-bottom:8px;border:none;background:none;border-radius:12px;cursor:pointer;text-align:left;transition:var(--transition);font-size:0.95rem;opacity:0.6;}
+.nav-menu button.active{background:var(--accent);color:white;opacity:1;}
+main{margin-left:280px;padding:60px 5%;width:calc(100%-280px);box-sizing:border-box;}
+.admin-card{background:var(--white);padding:40px;border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.02);border:1px solid var(--border);max-width:800px;display:none;animation:fadeIn 0.5s ease;}
+.admin-card.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.full-width{grid-column:span 2;}
+label{display:block;font-weight:600;margin-bottom:8px;font-size:0.85rem;}
+input,textarea{width:100%;padding:14px;border-radius:12px;border:1.5px solid #eee;background:#fafafa;font-family:inherit;transition:var(--transition);box-sizing:border-box;}
+input:focus,textarea:focus{border-color:var(--accent);background:white;outline:none;}
+.upload-box{border:2px dashed #eee;padding:20px;border-radius:15px;text-align:center;cursor:pointer;transition:var(--transition);}
+.upload-box:hover{border-color:var(--accent);background:#f0f4ff;}
+#preview-img{max-width:120px;border-radius:8px;margin-top:10px;display:none;border:1px solid #eee;}
+.sig-container{border:1.5px solid #eee;border-radius:12px;background:#fff;overflow:hidden;cursor:crosshair;touch-action:none;}
+#sig-canvas{width:100%;height:160px;display:block;background:#fdfdfd;}
+.sig-bar{padding:8px 15px;background:#f8f9fa;display:flex;justify-content:flex-end;}
+.btn-clear{background:none;border:1px solid #ff4d4d;color:#ff4d4d;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;}
+.btn-clear:hover{background:#ff4d4d;color:white;}
+.btn-send{background:var(--accent);color:white;border:none;padding:18px;border-radius:14px;font-weight:700;width:100%;cursor:pointer;transition:var(--transition);margin-top:20px;}
+.btn-send:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(0,82,204,0.2);}
+.list-item{padding:12px;border-bottom:1px solid #f5f5f5;font-size:0.9rem;display:flex;justify-content:space-between;}
+</style>
+</head>
+<body>
+
+<aside>
+    <div style="font-weight:800;color:var(--accent);font-size:1.2rem;">ЦНАП ADMIN</div>
+    <nav class="nav-menu">
+        <button class="active" onclick="showTab('issue',this)">📄 Видати документ</button>
+        <button onclick="showTab('users',this)">👥 Громадяни</button>
+        <button onclick="showTab('logs',this)">📜 Журнал дій</button>
+    </nav>
+    <a href="index.html" style="text-decoration:none;color:#999;font-size:0.8rem;margin-top:auto;">← Повернутись</a>
+</aside>
+
+<main>
+    <div id="issue" class="admin-card active">
+        <h2 style="margin-top:0">Новий запис у реєстр</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>ID Громадянина</label>
+                <input type="text" id="target-id" placeholder="UA-XXXX-XX-XXX">
+            </div>
+            <div class="form-group">
+                <label>Тип документа</label>
+                <input type="text" id="doc-type" placeholder="Паспорт, Витяг...">
+            </div>
+            <div class="form-group full-width">
+                <label>Термін дії (дд.мм.рррр)</label>
+                <input type="text" id="doc-expiry" placeholder="Напр. 31.12.2030">
+            </div>
+            <div class="form-group full-width">
+                <label>Фотографія</label>
+                <div class="upload-box" onclick="document.getElementById('file-in').click()">
+                    <span style="opacity:0.5">Натисніть для вибору картинки</span>
+                    <input type="file" id="file-in" hidden accept="image/*" onchange="handleImg(this)">
+                    <center><img id="preview-img" src=""></center>
+                </div>
+            </div>
+            <div class="form-group full-width">
+                <label>Опис та характеристики</label>
+                <textarea id="doc-desc" rows="3" placeholder="Додаткова інформація..."></textarea>
+            </div>
+            <div class="form-group full-width">
+                <label>Цифровий підпис реєстратора</label>
+                <div class="sig-container">
+                    <canvas id="sig-canvas"></canvas>
+                    <div class="sig-bar">
+                        <button class="btn-clear" onclick="clearSig()">Очистити</button>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-send" id="btn-issue">Затвердити та видати</button>
+        </div>
+    </div>
+
+    <div id="users" class="admin-card">
+        <h2>Список в базі</h2>
+        <div id="users-box"></div>
+    </div>
+
+    <div id="logs" class="admin-card">
+        <h2>Логи системи</h2>
+        <div id="logs-box"></div>
+    </div>
+</main>
+
+<script>
+if(localStorage.getItem("userRole")!=="highadmin") window.location.href="index.html";
+
+// Firebase
+const firebaseConfig={
+apiKey:"AIzaSyCApR43px9v7aSh-84HiF_xAo-Me7j46e4",
+authDomain:"cnapminecraft.firebaseapp.com",
+databaseURL:"https://cnapminecraft-default-rtdb.firebaseio.com",
+projectId:"cnapminecraft",
+storageBucket:"cnapminecraft.appspot.com",
+messagingSenderId:"935970032676",
+appId:"1:935970032676:web:49014e14b8adedfe99dcb1",
+measurementId:"G-5JMCJR0X61"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
+// Canvas
+const canvas=document.getElementById('sig-canvas');
+const ctx=canvas.getContext('2d');
+let isDrawing=false;
+function initCanvas(){canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; ctx.strokeStyle="#002752"; ctx.lineWidth=3; ctx.lineCap="round";}
+function getPos(e){const rect=canvas.getBoundingClientRect(); return {x:(e.clientX||e.touches[0].clientX)-rect.left, y:(e.clientY||e.touches[0].clientY)-rect.top};}
+function start(e){isDrawing=true; const pos=getPos(e); ctx.beginPath(); ctx.moveTo(pos.x,pos.y);}
+function draw(e){if(!isDrawing) return; if(e.type==='touchmove') e.preventDefault(); const pos=getPos(e); ctx.lineTo(pos.x,pos.y); ctx.stroke();}
+window.addEventListener('mouseup',()=>isDrawing=false);
+canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',draw);
+canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',draw,{passive:false}); canvas.addEventListener('touchend',()=>isDrawing=false);
+function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height);}
+
+// Image
+let currentImg="";
+function handleImg(input){if(input.files&&input.files[0]){const reader=new FileReader(); reader.onload=e=>{currentImg=e.target.result; document.getElementById('preview-img').src=currentImg; document.getElementById('preview-img').style.display="block";}; reader.readAsDataURL(input.files[0]);}}
+
+// Tabs
+function showTab(id,btn){document.querySelectorAll('.admin-card').forEach(c=>c.classList.remove('active')); document.querySelectorAll('.nav-menu button').forEach(b=>b.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); 
+if(id==='users'){ const name=localStorage.getItem("userName")||"Користувач"; const uid=localStorage.getItem("currentUserID")||"UA-0000"; document.getElementById('users-box').innerHTML=`<div class="list-item"><span><b>${name}</b></span><span>${uid}</span></div>`;}
+if(id==='logs'){ const logs=JSON.parse(localStorage.getItem("gov_logs"))||[]; document.getElementById('logs-box').innerHTML=logs.map(l=>`<div class="list-item">${l}</div>`).join('');}}
+
+// Issue doc
+document.getElementById('btn-issue').addEventListener('click',function(){
+    const id=document.getElementById('target-id').value.trim();
+    const type=document.getElementById('doc-type').value.trim();
+    const expiry=document.getElementById('doc-expiry').value.trim();
+    const desc=document.getElementById('doc-desc').value.trim();
+    const signature=canvas.toDataURL();
+
+    // Перевірка формату UA-XXXX-XX-XXX
+    if(!/^UA-\d{4}-\d{2}-\d{3}$/.test(id)) return alert("ID повинен бути унікальним у форматі UA-XXXX-XX-XXX!");
+    if(!type) return alert("Заповніть Тип документа!");
+
+    const docData={ type, desc, img:currentImg||"", signature, issuedBy:"highadmin", issuedAt:Date.now(), validUntil:expiry||null };
+
+    db.ref('citizens/'+id+'/documents').push(docData)
+    .then(()=>{
+        alert("Документ успішно видано!");
+        document.getElementById('target-id').value="";
+        document.getElementById('doc-type').value="";
+        document.getElementById('doc-expiry').value="";
+        document.getElementById('doc-desc').value="";
+        clearSig();
+        if(currentImg){currentImg=""; document.getElementById('preview-img').style.display="none";}
+        db.ref('logs').push(`${new Date().toLocaleString()} - Видано ${type} для ${id}`);
+    })
+    .catch(err=>{console.error(err); alert("Помилка при виданні документа!");});
+});
+
+window.onload=initCanvas;
+window.onresize=initCanvas;
+</script>
+
+</body>
+</html>

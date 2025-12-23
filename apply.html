@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Надіслати заявку | ЦНАП Онлайн</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #f5f6fa;
+        --white: #ffffff;
+        --accent: #0052cc;
+        --text: #1a1a1a;
+        --border: rgba(0,0,0,0.1);
+        --radius: 15px;
+        --transition: all 0.3s ease;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--bg);
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        background: var(--white);
+        padding: 20px 30px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--accent);
+    }
+
+    main {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .form-card {
+        background: var(--white);
+        padding: 30px;
+        border-radius: var(--radius);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    label {
+        font-weight: 600;
+        margin-bottom: 6px;
+        display: block;
+        color: var(--text);
+    }
+
+    input, textarea, select {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: var(--radius);
+        border: 1.5px solid var(--border);
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: var(--transition);
+        background: #fafafa;
+        box-sizing: border-box;
+    }
+
+    input:focus, textarea:focus, select:focus {
+        border-color: var(--accent);
+        background: #fff;
+        outline: none;
+    }
+
+    .upload-box {
+        border: 2px dashed var(--border);
+        padding: 15px;
+        border-radius: var(--radius);
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .upload-box:hover {
+        border-color: var(--accent);
+        background: #f0f4ff;
+    }
+
+    #preview-img {
+        max-width: 120px;
+        border-radius: 8px;
+        margin-top: 10px;
+        display: none;
+        border: 1px solid var(--border);
+    }
+
+    .stamp-select {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .stamp-option {
+        cursor: pointer;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        padding: 10px;
+        transition: var(--transition);
+    }
+
+    .stamp-option.selected {
+        border-color: var(--accent);
+        background: #f0f4ff;
+    }
+
+    .btn-send {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: var(--radius);
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+
+    .btn-send:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,82,204,0.2);
+    }
+
+    textarea { resize: vertical; }
+
+</style>
+</head>
+<body>
+
+<header>ЦНАП Онлайн — Надіслати заявку</header>
+
+<main>
+    <div class="form-card">
+        <label for="doc-title">Заголовок документа</label>
+        <input type="text" id="doc-title" placeholder="Наприклад: Паспорт, Витяг...">
+
+        <label for="doc-desc">Опис / Деталі</label>
+        <textarea id="doc-desc" rows="4" placeholder="Додаткова інформація..."></textarea>
+
+        <label>Фото (необов'язково)</label>
+        <div class="upload-box" onclick="document.getElementById('file-in').click()">
+            <span>Натисніть для вибору картинки</span>
+            <input type="file" id="file-in" hidden accept="image/*" onchange="handleImg(this)">
+            <center><img id="preview-img" src=""></center>
+        </div>
+
+        <label for="source">Звідки надходить заявка</label>
+        <input type="text" id="source" placeholder="Наприклад: Військкомат, Лікарня...">
+
+        <label for="valid-until">Дійсний до (дата)</label>
+        <input type="date" id="valid-until">
+
+        <label>Вибір печатки</label>
+        <div class="stamp-select">
+            <div class="stamp-option" id="stamp-circle" onclick="selectStamp('circle')">Кругла</div>
+            <div class="stamp-option" id="stamp-square" onclick="selectStamp('square')">Квадратна</div>
+        </div>
+
+        <button class="btn-send" onclick="sendRequest()">Надіслати заявку</button>
+    </div>
+</main>
+
+<script>
+    let currentImg = "";
+    let selectedStamp = "circle";
+
+    function handleImg(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImg = e.target.result;
+                const imgEl = document.getElementById('preview-img');
+                imgEl.src = currentImg;
+                imgEl.style.display = "block";
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function selectStamp(type) {
+        selectedStamp = type;
+        document.querySelectorAll('.stamp-option').forEach(el => el.classList.remove('selected'));
+        document.getElementById(`stamp-${type}`).classList.add('selected');
+    }
+
+    function sendRequest() {
+        const title = document.getElementById('doc-title').value.trim();
+        const desc = document.getElementById('doc-desc').value.trim();
+        const source = document.getElementById('source').value.trim();
+        const validUntil = document.getElementById('valid-until').value;
+
+        if(!title || !source || !validUntil) {
+            return alert("Будь ласка, заповніть всі обов'язкові поля: Заголовок, Звідки, Дійсний до.");
+        }
+
+        const now = new Date();
+        const id = `UA-${Math.floor(Math.random()*9000+1000)}-${now.getTime().toString().slice(-5)}-${Math.floor(Math.random()*900+100)}`;
+
+        const request = {
+            id,
+            title,
+            desc,
+            img: currentImg,
+            source,
+            validUntil,
+            stamp: selectedStamp,
+            dateSent: now.toLocaleDateString('uk-UA')
+        };
+
+        let requests = JSON.parse(localStorage.getItem("apply_requests") || "[]");
+        requests.push(request);
+        localStorage.setItem("apply_requests", JSON.stringify(requests));
+
+        alert("Заявка надіслана успішно!");
+        location.reload();
+    }
+</script>
+
+</body>
+  </html>

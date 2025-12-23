@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ЦНАП Онлайн | Державні послуги</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg: #f0f4f8;
+    --white: rgba(255, 255, 255, 0.9);
+    --glass-bg: rgba(255, 255, 255, 0.25);
+    --text: #1a1a1a;
+    --accent: #0052cc;
+    --accent-hover: #0066ff;
+    --radius: 20px;
+    --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0; padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #e2e8f0, #f0f4f8);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* HEADER */
+header {
+    backdrop-filter: blur(15px);
+    background: var(--glass-bg);
+    padding: 20px 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+header .logo {
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--accent);
+    text-decoration: none;
+}
+
+nav a {
+    text-decoration: none;
+    color: var(--text);
+    margin-left: 25px;
+    font-weight: 600;
+    opacity: 0.7;
+    transition: var(--transition);
+}
+
+nav a:hover {
+    opacity: 1;
+    color: var(--accent-hover);
+}
+
+.admin-link {
+    color: #e63946 !important;
+    font-weight: 700;
+    display: none; /* показується лише highadmin */
+}
+
+/* USER PANEL */
+.user-panel {
+    background: var(--white);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius);
+    margin: 40px 8% 20px;
+    padding: 25px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-info .id-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    opacity: 0.5;
+    margin-bottom: 5px;
+}
+
+.name-input {
+    font-size: 1.2rem;
+    font-weight: 700;
+    border: none;
+    border-bottom: 2px solid #eee;
+    outline: none;
+    padding: 6px 0;
+    width: 250px;
+    background: transparent;
+    transition: var(--transition);
+}
+
+.name-input:focus {
+    border-color: var(--accent);
+}
+
+.user-id-box {
+    text-align: right;
+}
+
+.user-id-box .id-label {
+    font-size: 0.7rem;
+    opacity: 0.5;
+    font-weight: 700;
+}
+
+.user-id-box .id-value {
+    font-family: 'Monaco', monospace;
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 1.1rem;
+}
+
+/* MAIN */
+main {
+    flex: 1;
+    padding: 20px 8% 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.hero {
+    margin-bottom: 40px;
+}
+
+.hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 1.1rem;
+    opacity: 0.6;
+}
+
+/* SERVICES GRID */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    background: var(--white);
+    backdrop-filter: blur(15px);
+    border-radius: var(--radius);
+    padding: 30px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+    border: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 0.95rem;
+    opacity: 0.6;
+    line-height: 1.5;
+}
+
+.card::after {
+    content: '→';
+    position: absolute;
+    right: 25px;
+    bottom: 25px;
+    font-size: 1.5rem;
+    opacity: 0;
+    transition: var(--transition);
+    color: var(--accent);
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    border-color: var(--accent);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+.card:hover::after {
+    opacity: 1;
+    transform: translateX(5px);
+}
+
+/* SECRET BUTTON */
+#secret-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: 0.3s;
+}
+
+.mode-user {
+    background: #ccc;
+}
+
+.mode-admin {
+    background: #28a745;
+    box-shadow: 0 0 12px #28a745;
+    opacity: 1 !important;
+}
+
+/* MEDIA */
+@media(max-width:768px){
+    .user-panel { flex-direction: column; align-items: flex-start; }
+    .user-id-box { text-align: left; margin-top: 10px; }
+}
+
+/* ANIMATION */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <a href="index.html" class="logo">ЦНАП.УКР</a>
+    <nav>
+        <a href="index.html">Головна</a>
+        <a href="profile.html">Мої документи</a>
+        <a href="admin.html" id="nav-admin" class="admin-link">Адміністрування</a>
+    </nav>
+</header>
+
+<div class="user-panel">
+    <div class="user-info">
+        <div class="id-label">Вітаємо у кабінеті</div>
+        <input type="text" id="user-name-field" class="name-input" placeholder="Введіть ваше ім'я...">
+    </div>
+    <div class="user-id-box">
+        <div class="id-label">Ваш цифровий ID</div>
+        <div id="user-id-display" class="id-value">UA-0000-00-000</div>
+    </div>
+</div>
+
+<main>
+    <section class="hero">
+        <h1>Послуги без черг та паперів</h1>
+        <p>Виберіть необхідний тип документа для подачі заявки онлайн.</p>
+    </section>
+
+    <div class="services-grid">
+        <div class="card" onclick="location.href='apply.html?service=ID-картка'">
+            <h3>Паспорти</h3>
+            <p>Оформлення першої ID-картки, заміна документа або вклеювання фото.</p>
+        </div>
+        <div class="card" onclick="location.href='apply.html?service=Земельний витяг'">
+            <h3>Земля та майно</h3>
+            <p>Отримання витягів з ДЗК та реєстрація права власності на ділянку.</p>
+        </div>
+        <div class="card" onclick="location.href='apply.html?service=Техпаспорт'">
+            <h3>Транспорт</h3>
+            <p>Електронний техпаспорт та реєстраційні дії з автомобілем.</p>
+        </div>
+    </div>
+</main>
+
+<button id="secret-btn" class="mode-user"></button>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCApR43px9v7aSh-84HiF_xAo-Me7j46e4",
+  authDomain: "cnapminecraft.firebaseapp.com",
+  projectId: "cnapminecraft",
+  storageBucket: "cnapminecraft.appspot.com",
+  messagingSenderId: "935970032676",
+  appId: "1:935970032676:web:49014e14b8adedfe99dcb1",
+  measurementId: "G-5JMCJR0X61"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+</script>
+
+<script>
+// Ініціалізація користувача
+const nameInput = document.getElementById('user-name-field');
+const idDisplay = document.getElementById('user-id-display');
+const secretBtn = document.getElementById('secret-btn');
+const adminLink = document.getElementById('nav-admin');
+
+function generateID() {
+    // UA-XXXX-XX-XXX
+    const part1 = Math.floor(1000 + Math.random()*9000);
+    const part2 = Math.floor(10 + Math.random()*90);
+    const part3 = Math.floor(100 + Math.random()*900);
+    return `UA-${part1}-${part2}-${part3}`;
+}
+
+function setupUser(){
+    let uid = localStorage.getItem("currentUserID");
+    if(!uid){
+        uid = generateID();
+        localStorage.setItem("currentUserID", uid);
+    }
+    idDisplay.innerText = uid;
+
+    const savedName = localStorage.getItem("userName");
+    if(savedName) nameInput.value = savedName;
+
+    updateRoleView();
+}
+
+nameInput.addEventListener('input', e => {
+    localStorage.setItem("userName", e.target.value);
+});
+
+function updateRoleView(){
+    const role = localStorage.getItem("userRole");
+    if(role==="highadmin"){
+        adminLink.style.display = "inline-block";
+        secretBtn.className = "mode-admin";
+    }else{
+        adminLink.style.display = "none";
+        secretBtn.className = "mode-user";
+    }
+}
+
+secretBtn.addEventListener('click', ()=>{
+    const role = localStorage.getItem("userRole");
+    if(role==="highadmin") localStorage.setItem("userRole","user");
+    else localStorage.setItem("userRole","highadmin");
+    updateRoleView();
+});
+
+setupUser();
+</script>
+
+</body>
+          </html>
